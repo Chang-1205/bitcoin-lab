@@ -1,0 +1,17 @@
+{
+  "name": "bitcoin-lab",
+  "version": "1.0.0",
+  "description": "Bitcoin Core Regtest FinTech Lab",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bitcoinjs-lib": "^7.0.2",
+    "dotenv": "^17.4.2",
+    "ecpair": "^3.0.2",
+    "express": "^5.1.0",
+    "tiny-secp256k1": "^2.2.4"
+  }
+}

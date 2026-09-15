@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Bitcoin Regtest Lab</title>
+
+  <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+<header class="header">
+  <div>
+    <div class="eyebrow">
+      PTIT · BLOCKCHAIN / FINTECH LAB
+    </div>
+
+    <h1>Bitcoin Regtest Wallet</h1>
+
+    <p>
+      Local Bitcoin Core · Real Regtest Data · PSBT / SDK Signing
+    </p>
+  </div>
+
+  <div class="header-actions">
+    <button
+      id="refreshBtn"
+      class="btn btn-primary"
+    >
+      ↻ Refresh
+    </button>
+  </div>
+</header>
+
+
+<main class="container">
+
+  <!-- ====================================================== -->
+  <!-- STATUS -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+      <div>
+        <h2>Blockchain Status</h2>
+        <p>Trạng thái Bitcoin Core Regtest hiện tại</p>
+      </div>
+    </div>
+
+    <div class="status-grid">
+
+      <div class="stat">
+        <span class="stat-label">Network</span>
+        <strong id="networkStatus">—</strong>
+      </div>
+
+      <div class="stat">
+        <span class="stat-label">Block Height</span>
+        <strong id="blockHeight">—</strong>
+      </div>
+
+      <div class="stat">
+        <span class="stat-label">Headers</span>
+        <strong id="blockHeaders">—</strong>
+      </div>
+
+      <div class="stat">
+        <span class="stat-label">IBD</span>
+        <strong id="ibdStatus">—</strong>
+      </div>
+
+    </div>
+
+    <div
+      id="statusMessage"
+      class="message"
+    ></div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- BALANCE -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+      <div>
+        <h2>Balance</h2>
+        <p>
+          Số dư được tính trực tiếp từ UTXO của các address lab
+        </p>
+      </div>
+    </div>
+
+    <div class="balance-main">
+
+      <div class="balance-box primary-balance">
+        <span>Ví của tôi</span>
+
+        <strong id="myBalance">
+          —
+        </strong>
+
+        <small>
+          Lab Wallet · 4 address types
+        </small>
+      </div>
+
+      <div class="balance-box">
+        <span>Faucet / Miner</span>
+
+        <strong id="minerBalance">
+          —
+        </strong>
+
+        <small>
+          Bitcoin Core wallet: miner
+        </small>
+      </div>
+
+      <div class="balance-box">
+        <span>Tổng UTXO</span>
+
+        <strong id="utxoCount">
+          —
+        </strong>
+
+        <small>
+          UTXO đang chưa được spend
+        </small>
+      </div>
+
+    </div>
+
+    <div class="balance-types">
+
+      <div class="type-balance">
+        <span>P2PKH</span>
+        <strong id="balanceP2PKH">—</strong>
+      </div>
+
+      <div class="type-balance">
+        <span>P2SH-P2WPKH</span>
+        <strong id="balanceP2SH">—</strong>
+      </div>
+
+      <div class="type-balance">
+        <span>P2WPKH</span>
+        <strong id="balanceP2WPKH">—</strong>
+      </div>
+
+      <div class="type-balance">
+        <span>P2TR</span>
+        <strong id="balanceP2TR">—</strong>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- ADDRESSES -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+      <div>
+        <h2>My Wallet Addresses</h2>
+        <p>
+          Bốn address được sinh từ cùng một private key
+        </p>
+      </div>
+    </div>
+
+    <div
+      id="addressList"
+      class="address-list"
+    ></div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- FAUCET -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+      <div>
+        <h2>Regtest Faucet</h2>
+        <p>
+          Miner wallet gửi BTC Regtest vào một address của Lab Wallet
+        </p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label for="faucetType">
+          Address nhận
+        </label>
+
+        <select id="faucetType">
+          <option value="P2PKH">P2PKH</option>
+          <option value="P2SH_P2WPKH">
+            P2SH-P2WPKH
+          </option>
+          <option value="P2WPKH">
+            P2WPKH
+          </option>
+          <option value="P2TR">
+            P2TR
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="faucetAmount">
+          Số lượng BTC
+        </label>
+
+        <input
+          id="faucetAmount"
+          type="text"
+          value="1"
+          placeholder="1.00000000"
+        >
+      </div>
+
+      <div class="form-group form-action">
+        <button
+          id="faucetBtn"
+          class="btn btn-secondary"
+        >
+          Gửi từ Faucet
+        </button>
+      </div>
+
+    </div>
+
+    <div class="notice">
+      Faucet transaction nằm trong mempool trước khi được mine.
+      Hãy bấm <b>Mine 1 Block</b> để đưa giao dịch vào blockchain
+      và cập nhật UTXO.
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- MINING -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+      <div>
+        <h2>Mine Block</h2>
+        <p>
+          Mine 1 block Regtest để xác nhận transaction
+        </p>
+      </div>
+
+      <button
+        id="mineBtn"
+        class="btn btn-primary"
+      >
+        ⛏ Mine 1 Block
+      </button>
+    </div>
+
+    <div
+      id="mineResult"
+      class="result-box hidden"
+    ></div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- TRANSACTION -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+      <div>
+        <h2>Send Bitcoin</h2>
+        <p>
+          Chọn UTXO → tạo PSBT → ký bằng SDK → broadcast
+        </p>
+      </div>
+    </div>
+
+    <div class="form-grid transaction-form">
+
+      <div class="form-group full-width">
+
+        <label for="destination">
+          Địa chỉ người nhận
+        </label>
+
+        <input
+          id="destination"
+          type="text"
+          placeholder="Nhập địa chỉ Bitcoin Regtest..."
+        >
+
+        <small>
+          Có thể dùng địa chỉ Regtest của ví khác.
+        </small>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="amount">
+          Số lượng BTC
+        </label>
+
+        <input
+          id="amount"
+          type="text"
+          value="0.5"
+          placeholder="0.50000000"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="fee">
+          Fee (satoshi)
+        </label>
+
+        <input
+          id="fee"
+          type="number"
+          value="100000"
+          min="0"
+          step="1"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="selectionMode">
+          Chế độ chọn UTXO
+        </label>
+
+        <select id="selectionMode">
+
+          <option value="minimal">
+            Ít input nhất
+          </option>
+
+          <option value="mixed5">
+            5 input hỗn hợp — Demo 5 chữ ký
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-actions">
+
+        <button
+          id="previewBtn"
+          class="btn btn-outline"
+        >
+          Xem trước giao dịch
+        </button>
+
+        <button
+          id="sendBtn"
+          class="btn btn-primary"
+        >
+          Gửi giao dịch
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="transactionMessage"
+      class="message"
+    ></div>
+
+
+    <!-- PREVIEW -->
+
+    <div
+      id="previewPanel"
+      class="preview-panel hidden"
+    >
+
+      <h3>Transaction Preview</h3>
+
+      <div class="summary-grid">
+
+        <div>
+          <span>Số input</span>
+          <strong id="previewInputs">—</strong>
+        </div>
+
+        <div>
+          <span>Input total</span>
+          <strong id="previewInputTotal">—</strong>
+        </div>
+
+        <div>
+          <span>Amount</span>
+          <strong id="previewAmount">—</strong>
+        </div>
+
+        <div>
+          <span>Fee</span>
+          <strong id="previewFee">—</strong>
+        </div>
+
+        <div>
+          <span>Change</span>
+          <strong id="previewChange">—</strong>
+        </div>
+
+        <div>
+          <span>Input types</span>
+          <strong id="previewTypes">—</strong>
+        </div>
+
+      </div>
+
+
+      <h4>UTXO được chọn</h4>
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>TXID</th>
+              <th>Vout</th>
+              <th>Amount</th>
+              <th>Confirm</th>
+            </tr>
+          </thead>
+
+          <tbody id="previewUtxos">
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- SEND RESULT -->
+
+    <div
+      id="sendResult"
+      class="result-box hidden"
+    >
+
+      <h3>Transaction Broadcasted</h3>
+
+      <div class="tx-result">
+
+        <span>TXID</span>
+
+        <code id="resultTxid">
+          —
+        </code>
+
+      </div>
+
+      <div class="result-details">
+
+        <div>
+          <span>Amount</span>
+          <strong id="resultAmount">—</strong>
+        </div>
+
+        <div>
+          <span>Fee</span>
+          <strong id="resultFee">—</strong>
+        </div>
+
+        <div>
+          <span>Change</span>
+          <strong id="resultChange">—</strong>
+        </div>
+
+        <div>
+          <span>Signed Inputs</span>
+          <strong id="resultInputs">—</strong>
+        </div>
+
+      </div>
+
+      <p>
+        Giao dịch đã được broadcast tới Bitcoin Core.
+        Confirmation sẽ tăng sau khi mine block.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- UTXO -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+
+      <div>
+        <h2>Current UTXO Set</h2>
+        <p>
+          UTXO thực tế của 4 address Lab Wallet
+        </p>
+      </div>
+
+    </div>
+
+    <div class="summary">
+
+      <div>
+        <span>Total UTXO</span>
+        <strong id="utxoTotalCount">—</strong>
+      </div>
+
+      <div>
+        <span>Total Value</span>
+        <strong id="utxoTotalValue">—</strong>
+      </div>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>TXID</th>
+            <th>Vout</th>
+            <th>Amount</th>
+            <th>Confirmations</th>
+            <th>Address</th>
+          </tr>
+        </thead>
+
+        <tbody id="utxoTable">
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- TRANSACTION HISTORY -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+
+      <div>
+        <h2>Transaction History</h2>
+        <p>
+          Lịch sử transaction từ Bitcoin Core
+        </p>
+      </div>
+
+    </div>
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>TXID</th>
+            <th>Confirmations</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="historyTable">
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- LATEST TRANSACTION DETAIL -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+
+      <div>
+        <h2>Latest Transaction Detail</h2>
+        <p>
+          Chi tiết transaction gần nhất
+        </p>
+      </div>
+
+    </div>
+
+    <div
+      id="latestTransaction"
+      class="transaction-detail"
+    >
+      Chưa có transaction.
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- WORKFLOW -->
+  <!-- ====================================================== -->
+
+  <section class="card">
+
+    <div class="section-title">
+
+      <div>
+        <h2>Lab Workflow</h2>
+        <p>
+          Quy trình thực hiện bài thực hành
+        </p>
+      </div>
+
+    </div>
+
+    <div class="workflow">
+
+      <div class="workflow-step">
+        <b>01</b>
+        <span>Bitcoin Core Regtest</span>
+      </div>
+
+      <div class="workflow-arrow">→</div>
+
+      <div class="workflow-step">
+        <b>02</b>
+        <span>Mine Block</span>
+      </div>
+
+      <div class="workflow-arrow">→</div>
+
+      <div class="workflow-step">
+        <b>03</b>
+        <span>4 Address Types</span>
+      </div>
+
+      <div class="workflow-arrow">→</div>
+
+      <div class="workflow-step">
+        <b>04</b>
+        <span>Scan UTXO</span>
+      </div>
+
+      <div class="workflow-arrow">→</div>
+
+      <div class="workflow-step">
+        <b>05</b>
+        <span>Coin Selection</span>
+      </div>
+
+      <div class="workflow-arrow">→</div>
+
+      <div class="workflow-step">
+        <b>06</b>
+        <span>PSBT + SDK Signing</span>
+      </div>
+
+      <div class="workflow-arrow">→</div>
+
+      <div class="workflow-step">
+        <b>07</b>
+        <span>Broadcast</span>
+      </div>
+
+      <div class="workflow-arrow">→</div>
+
+      <div class="workflow-step">
+        <b>08</b>
+        <span>Refresh / History</span>
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer>
+  Bitcoin Regtest Lab · Data from local Bitcoin Core
+</footer>
+
+
+<script src="/app.js"></script>
+
+</body>
+</html>
