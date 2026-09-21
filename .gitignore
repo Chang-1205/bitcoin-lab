@@ -9,6 +9,9 @@ node_modules/
 signed-tx.hex
 signed-tx-id.txt
 
+# Application data / local transaction history
+data/
+
 # Logs
 *.log
 npm-debug.log*

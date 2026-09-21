@@ -2,8 +2,7 @@
 // BITCOIN REGTEST LAB - FRONTEND
 // ============================================================
 
-const $ = (id) =>
-  document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
 
 // ============================================================
@@ -17,27 +16,22 @@ let walletAddresses = {};
 // FETCH JSON
 // ============================================================
 
-async function fetchJson(
-  url,
-  options = {}
-) {
-  const response =
-    await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {})
-      }
-    });
+async function fetchJson(url, options = {}) {
 
-  const text =
-    await response.text();
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  });
+
+  const text = await response.text();
 
   let data;
 
   try {
-    data =
-      JSON.parse(text);
+    data = JSON.parse(text);
   } catch {
     throw new Error(
       `Server không trả JSON cho ${url}. HTTP ${response.status}.`
@@ -45,6 +39,7 @@ async function fetchJson(
   }
 
   if (!response.ok || data.success === false) {
+
     throw new Error(
       data.error ||
       `HTTP ${response.status}`
@@ -60,6 +55,7 @@ async function fetchJson(
 // ============================================================
 
 function btc(value) {
+
   if (
     value === null ||
     value === undefined ||
@@ -68,12 +64,21 @@ function btc(value) {
     return '—';
   }
 
-  return `${Number(value).toFixed(8)} BTC`;
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return '—';
+  }
+
+  return `${number.toFixed(8)} BTC`;
 }
 
 
 function shortenTxid(txid) {
-  if (!txid) return '—';
+
+  if (!txid) {
+    return '—';
+  }
 
   if (txid.length <= 20) {
     return txid;
@@ -88,6 +93,7 @@ function shortenTxid(txid) {
 
 
 function escapeHtml(value) {
+
   return String(value ?? '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -96,6 +102,35 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;');
 }
 
+
+function formatDate(value) {
+
+  if (!value) {
+    return '—';
+  }
+
+  let date;
+
+  if (typeof value === 'number') {
+
+    date = new Date(value * 1000);
+
+  } else {
+
+    date = new Date(value);
+  }
+
+  if (Number.isNaN(date.getTime())) {
+    return '—';
+  }
+
+  return date.toLocaleString('vi-VN');
+}
+
+
+// ============================================================
+// TYPE BADGE
+// ============================================================
 
 function typeBadge(type) {
 
@@ -115,7 +150,55 @@ function typeBadge(type) {
 
   return `
     <span class="badge ${classes[type] || ''}">
-      ${labels[type] || type}
+      ${escapeHtml(labels[type] || type || 'Unknown')}
+    </span>
+  `;
+}
+
+
+// ============================================================
+// STATUS BADGE
+// ============================================================
+
+function statusBadge(status) {
+
+  const normalized =
+    String(status || '')
+      .toUpperCase();
+
+  const config = {
+
+    SUCCESS: {
+      className: 'badge-confirmed',
+      label: 'SUCCESS'
+    },
+
+    CONFIRMED: {
+      className: 'badge-confirmed',
+      label: 'CONFIRMED'
+    },
+
+    PENDING: {
+      className: 'badge-pending',
+      label: 'PENDING'
+    },
+
+    FAILED: {
+      className: 'badge-failed',
+      label: 'FAILED'
+    }
+
+  };
+
+  const item =
+    config[normalized] || {
+      className: 'badge-pending',
+      label: normalized || 'UNKNOWN'
+    };
+
+  return `
+    <span class="badge ${item.className}">
+      ${escapeHtml(item.label)}
     </span>
   `;
 }
@@ -125,12 +208,14 @@ function typeBadge(type) {
 // MESSAGE
 // ============================================================
 
-function showMessage(
-  element,
-  text,
-  type = ''
-) {
+function showMessage(element, text, type = '') {
+
+  if (!element) {
+    return;
+  }
+
   element.textContent = text;
+
   element.className =
     `message ${type}`;
 }
@@ -145,31 +230,25 @@ async function loadStatus() {
   try {
 
     const data =
-      await fetchJson(
-        '/api/status'
-      );
+      await fetchJson('/api/status');
 
-    $('networkStatus')
-      .textContent =
-      data.chain;
+    $('networkStatus').textContent =
+      data.chain ?? '—';
 
-    $('blockHeight')
-      .textContent =
-      data.blocks;
+    $('blockHeight').textContent =
+      data.blocks ?? '—';
 
-    $('blockHeaders')
-      .textContent =
-      data.headers;
+    $('blockHeaders').textContent =
+      data.headers ?? '—';
 
-    $('ibdStatus')
-      .textContent =
+    $('ibdStatus').textContent =
       data.initialblockdownload
         ? 'YES'
         : 'NO';
 
     showMessage(
       $('statusMessage'),
-      `Best block: ${data.bestblockhash}`,
+      `Best block: ${data.bestblockhash || '—'}`,
       'success'
     );
 
@@ -190,50 +269,67 @@ async function loadStatus() {
 
 async function loadAddresses() {
 
-  const data =
-    await fetchJson(
-      '/api/addresses'
-    );
+  try {
 
-  walletAddresses =
-    data.addresses;
+    const data =
+      await fetchJson('/api/addresses');
 
-  const rows =
-    Object.entries(
-      walletAddresses
-    ).map(
-      ([type, address]) => `
-        <div class="address-row">
+    walletAddresses =
+      data.addresses || {};
 
-          <div class="address-type">
-            ${typeBadge(type)}
-          </div>
+    const rows =
+      Object.entries(walletAddresses)
+        .map(([type, address]) => {
 
-          <div class="address-value">
-            ${escapeHtml(address)}
-          </div>
+          return `
+            <div class="address-row">
 
-          <button
-            class="copy-btn"
-            data-copy="${escapeHtml(address)}"
-          >
-            Copy
-          </button>
+              <div class="address-type">
+                ${typeBadge(type)}
+              </div>
 
-        </div>
+              <div class="address-value">
+                ${escapeHtml(address)}
+              </div>
+
+              <button
+                class="copy-btn"
+                data-copy="${escapeHtml(address)}"
+                type="button"
+              >
+                Copy
+              </button>
+
+            </div>
+          `;
+        })
+        .join('');
+
+    $('addressList').innerHTML =
+      rows ||
       `
-    ).join('');
+        <div class="empty-state">
+          Chưa có address.
+        </div>
+      `;
 
-  $('addressList')
-    .innerHTML = rows;
+    // Mặc định gửi về P2WPKH của chính Lab Wallet
+    if (
+      walletAddresses.P2WPKH &&
+      !$('destination').value
+    ) {
 
-  // Mặc định gửi về P2WPKH của chính Lab Wallet
-  if (
-    walletAddresses.P2WPKH &&
-    !$('destination').value
-  ) {
-    $('destination').value =
-      walletAddresses.P2WPKH;
+      $('destination').value =
+        walletAddresses.P2WPKH;
+    }
+
+  } catch (error) {
+
+    $('addressList').innerHTML = `
+      <div class="message error">
+        ${escapeHtml(error.message)}
+      </div>
+    `;
   }
 }
 
@@ -247,43 +343,36 @@ async function loadBalance() {
   try {
 
     const data =
-      await fetchJson(
-        '/api/balance'
-      );
+      await fetchJson('/api/balance');
 
     const wallet =
-      data.myWallet;
+      data.myWallet || {};
 
-    $('myBalance')
-      .textContent =
+    $('myBalance').textContent =
       btc(wallet.totalBtc);
 
-    $('minerBalance')
-      .textContent =
-      data.faucet.minerBalanceBtc === null
+    const minerBalance =
+      data.faucet?.minerBalanceBtc;
+
+    $('minerBalance').textContent =
+      minerBalance === null ||
+      minerBalance === undefined
         ? '—'
-        : btc(
-            data.faucet.minerBalanceBtc
-          );
+        : btc(minerBalance);
 
-    $('utxoCount')
-      .textContent =
-      wallet.utxoCount;
+    $('utxoCount').textContent =
+      wallet.utxoCount ?? '—';
 
-    $('balanceP2PKH')
-      .textContent =
+    $('balanceP2PKH').textContent =
       btc(wallet.P2PKH);
 
-    $('balanceP2SH')
-      .textContent =
+    $('balanceP2SH').textContent =
       btc(wallet.P2SH_P2WPKH);
 
-    $('balanceP2WPKH')
-      .textContent =
+    $('balanceP2WPKH').textContent =
       btc(wallet.P2WPKH);
 
-    $('balanceP2TR')
-      .textContent =
+    $('balanceP2TR').textContent =
       btc(wallet.P2TR);
 
   } catch (error) {
@@ -302,23 +391,25 @@ async function loadBalance() {
 
 async function loadUtxos() {
 
-  const data =
-    await fetchJson(
-      '/api/utxos'
-    );
+  try {
 
-  $('utxoTotalCount')
-    .textContent =
-    data.count;
+    const data =
+      await fetchJson('/api/utxos');
 
-  $('utxoTotalValue')
-    .textContent =
-    btc(data.totalBtc);
+    $('utxoTotalCount').textContent =
+      data.count ?? 0;
 
-  if (!data.utxos.length) {
+    $('utxoTotalValue').textContent =
+      btc(data.totalBtc);
 
-    $('utxoTable')
-      .innerHTML = `
+    const utxos =
+      Array.isArray(data.utxos)
+        ? data.utxos
+        : [];
+
+    if (!utxos.length) {
+
+      $('utxoTable').innerHTML = `
         <tr>
           <td colspan="6">
             Không có UTXO.
@@ -326,50 +417,70 @@ async function loadUtxos() {
         </tr>
       `;
 
-    return;
+      return;
+    }
+
+    $('utxoTable').innerHTML =
+      utxos.map((u) => {
+
+        return `
+          <tr>
+
+            <td>
+              ${typeBadge(u.type)}
+            </td>
+
+            <td class="txid">
+
+              <span>
+                ${escapeHtml(
+                  shortenTxid(u.txid)
+                )}
+              </span>
+
+              <br>
+
+              <small>
+                ${escapeHtml(u.txid)}
+              </small>
+
+            </td>
+
+            <td>
+              ${escapeHtml(u.vout)}
+            </td>
+
+            <td>
+              <b>
+                ${btc(u.amountBtc)}
+              </b>
+            </td>
+
+            <td>
+              ${escapeHtml(
+                u.confirmations ?? 0
+              )}
+            </td>
+
+            <td class="address-cell">
+              ${escapeHtml(u.address)}
+            </td>
+
+          </tr>
+        `;
+
+      }).join('');
+
+  } catch (error) {
+
+    $('utxoTable').innerHTML = `
+      <tr>
+        <td colspan="6" class="error-cell">
+          ${escapeHtml(error.message)}
+        </td>
+      </tr>
+    `;
   }
-
-  $('utxoTable')
-    .innerHTML =
-    data.utxos.map(
-      u => `
-        <tr>
-
-          <td>
-            ${typeBadge(u.type)}
-          </td>
-
-          <td class="txid">
-            ${escapeHtml(
-              shortenTxid(u.txid)
-            )}
-            <br>
-            <small>
-              ${escapeHtml(u.txid)}
-            </small>
-          </td>
-
-          <td>
-            ${u.vout}
-          </td>
-
-          <td>
-            <b>
-              ${btc(u.amountBtc)}
-            </b>
-          </td>
-
-          <td>
-            ${u.confirmations}
-          </td>
-
-          <td class="address-cell">
-            ${escapeHtml(u.address)}
-          </td>
-
-        </tr>
-      `
-    ).join('');
 }
 
 
@@ -387,103 +498,113 @@ async function loadHistory() {
       );
 
     const transactions =
-      data.transactions || [];
+      Array.isArray(data.transactions)
+        ? data.transactions
+        : [];
 
     if (!transactions.length) {
 
-      $('historyTable')
-        .innerHTML = `
-          <tr>
-            <td colspan="5">
-              Chưa có lịch sử transaction.
-            </td>
-          </tr>
-        `;
+      $('historyTable').innerHTML = `
+        <tr>
+          <td colspan="6">
+            Chưa có lịch sử transaction.
+          </td>
+        </tr>
+      `;
 
       return;
     }
 
-    $('historyTable')
-      .innerHTML =
-      transactions.map(
-        tx => {
 
-          const confirmations =
-            Number(
-              tx.confirmations || 0
-            );
+    $('historyTable').innerHTML =
+      transactions.map((tx) => {
 
-          const category =
-            tx.category || 'unknown';
+        const confirmations =
+          Number(
+            tx.confirmations ?? 0
+          );
 
-          const amount =
-            Number(
-              tx.amount || 0
-            );
+        let status =
+          tx.status;
 
-          const sign =
-            amount > 0
-              ? '+'
-              : '';
+        if (!status) {
 
-          const date =
-            tx.timereceived
-              ? new Date(
-                  tx.timereceived * 1000
-                ).toLocaleString(
-                  'vi-VN'
-                )
-              : '—';
-
-          return `
-            <tr>
-
-              <td>
-                ${escapeHtml(date)}
-              </td>
-
-              <td>
-                <span class="badge ${
-                  category === 'receive'
-                    ? 'badge-confirmed'
-                    : 'badge-pending'
-                }">
-                  ${escapeHtml(category)}
-                </span>
-              </td>
-
-              <td>
-                <b>
-                  ${sign}${amount.toFixed(8)} BTC
-                </b>
-              </td>
-
-              <td class="txid">
-                ${escapeHtml(
-                  tx.txid || '—'
-                )}
-              </td>
-
-              <td>
-                ${
-                  confirmations > 0
-                    ? `
-                      <span class="badge badge-confirmed">
-                        ${confirmations}
-                      </span>
-                    `
-                    : `
-                      <span class="badge badge-pending">
-                        0 · Pending
-                      </span>
-                    `
-                }
-              </td>
-
-            </tr>
-          `;
+          status =
+            confirmations > 0
+              ? 'CONFIRMED'
+              : 'PENDING';
         }
-      ).join('');
+
+        const type =
+          tx.type ||
+          tx.category ||
+          'transaction';
+
+        const amount =
+          tx.amountBtc ??
+          tx.amount ??
+          0;
+
+        const txid =
+          tx.txid || '—';
+
+        const time =
+          tx.createdAt ||
+          tx.timestamp ||
+          tx.timereceived ||
+          tx.time;
+
+        return `
+          <tr>
+
+            <td>
+              ${escapeHtml(
+                formatDate(time)
+              )}
+            </td>
+
+            <td>
+              ${statusBadge(status)}
+            </td>
+
+            <td>
+              ${escapeHtml(type)}
+            </td>
+
+            <td>
+              <b>
+                ${btc(amount)}
+              </b>
+            </td>
+
+            <td class="txid">
+              ${escapeHtml(txid)}
+            </td>
+
+            <td>
+
+              ${
+                confirmations > 0
+
+                  ? `
+                    <span class="badge badge-confirmed">
+                      ${confirmations}
+                    </span>
+                  `
+
+                  : `
+                    <span class="badge badge-pending">
+                      0 · Pending
+                    </span>
+                  `
+              }
+
+            </td>
+
+          </tr>
+        `;
+
+      }).join('');
 
   } catch (error) {
 
@@ -491,6 +612,14 @@ async function loadHistory() {
       'History:',
       error
     );
+
+    $('historyTable').innerHTML = `
+      <tr>
+        <td colspan="6" class="error-cell">
+          Không lấy được lịch sử: ${escapeHtml(error.message)}
+        </td>
+      </tr>
+    `;
   }
 }
 
@@ -513,8 +642,7 @@ async function loadLatestTransaction() {
 
     if (!tx) {
 
-      $('latestTransaction')
-        .textContent =
+      $('latestTransaction').textContent =
         'Chưa có transaction.';
 
       return;
@@ -522,7 +650,7 @@ async function loadLatestTransaction() {
 
     const confirmations =
       Number(
-        tx.confirmations || 0
+        tx.confirmations ?? 0
       );
 
     const status =
@@ -530,95 +658,113 @@ async function loadLatestTransaction() {
         ? `${confirmations} confirmation`
         : 'Pending · 0 confirmation';
 
-    $('latestTransaction')
-      .innerHTML = `
 
-        <div class="transaction-id-box">
+    $('latestTransaction').innerHTML = `
 
-          <span>
-            TXID
-          </span>
+      <div class="transaction-id-box">
 
-          <code>
-            ${escapeHtml(tx.txid)}
-          </code>
+        <span>
+          TXID
+        </span>
 
+        <code>
+          ${escapeHtml(tx.txid)}
+        </code>
+
+      </div>
+
+
+      <div class="transaction-detail-grid">
+
+        <div>
+          <span>Status</span>
+
+          <strong>
+            ${escapeHtml(status)}
+          </strong>
         </div>
 
-        <div class="transaction-detail-grid">
 
-          <div>
-            <span>Status</span>
-            <strong>
-              ${escapeHtml(status)}
-            </strong>
-          </div>
+        <div>
+          <span>Block</span>
 
-          <div>
-            <span>Block</span>
-            <strong>
-              ${
-                tx.blockhash
-                  ? escapeHtml(
-                      shortenTxid(
-                        tx.blockhash
-                      )
+          <strong>
+            ${
+              tx.blockhash
+                ? escapeHtml(
+                    shortenTxid(
+                      tx.blockhash
                     )
-                  : 'Mempool'
-              }
-            </strong>
-          </div>
-
-          <div>
-            <span>Inputs</span>
-            <strong>
-              ${tx.vin?.length || 0}
-            </strong>
-          </div>
-
-          <div>
-            <span>Outputs</span>
-            <strong>
-              ${tx.vout?.length || 0}
-            </strong>
-          </div>
-
-          <div>
-            <span>Size</span>
-            <strong>
-              ${tx.size ?? '—'} bytes
-            </strong>
-          </div>
-
-          <div>
-            <span>Virtual Size</span>
-            <strong>
-              ${tx.vsize ?? '—'} vbytes
-            </strong>
-          </div>
-
-          <div>
-            <span>Weight</span>
-            <strong>
-              ${tx.weight ?? '—'}
-            </strong>
-          </div>
-
-          <div>
-            <span>Version</span>
-            <strong>
-              ${tx.version ?? '—'}
-            </strong>
-          </div>
-
+                  )
+                : 'Mempool'
+            }
+          </strong>
         </div>
-      `;
+
+
+        <div>
+          <span>Inputs</span>
+
+          <strong>
+            ${tx.vin?.length || 0}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Outputs</span>
+
+          <strong>
+            ${tx.vout?.length || 0}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Size</span>
+
+          <strong>
+            ${tx.size ?? '—'} bytes
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Virtual Size</span>
+
+          <strong>
+            ${tx.vsize ?? '—'} vbytes
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Weight</span>
+
+          <strong>
+            ${tx.weight ?? '—'}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>Version</span>
+
+          <strong>
+            ${tx.version ?? '—'}
+          </strong>
+        </div>
+
+      </div>
+    `;
 
   } catch (error) {
 
-    $('latestTransaction')
-      .textContent =
-      'Không lấy được transaction gần nhất.';
+    $('latestTransaction').innerHTML = `
+      <span class="error-text">
+        Không lấy được transaction gần nhất.
+      </span>
+    `;
   }
 }
 
@@ -629,8 +775,10 @@ async function loadLatestTransaction() {
 
 async function refreshAll() {
 
-  $('refreshBtn')
-    .disabled = true;
+  const refreshButton =
+    $('refreshBtn');
+
+  refreshButton.disabled = true;
 
   try {
 
@@ -646,13 +794,13 @@ async function refreshAll() {
   } catch (error) {
 
     console.error(
+      'Refresh:',
       error
     );
 
   } finally {
 
-    $('refreshBtn')
-      .disabled = false;
+    refreshButton.disabled = false;
   }
 }
 
@@ -691,9 +839,7 @@ async function previewTransaction() {
   );
 
   $('previewPanel')
-    .classList.add(
-      'hidden'
-    );
+    .classList.add('hidden');
 
   try {
 
@@ -737,71 +883,85 @@ async function previewTransaction() {
 
 function renderPreview(data) {
 
-  $('previewInputs')
-    .textContent =
-    data.selectedCount;
+  $('previewInputs').textContent =
+    data.selectedCount ?? 0;
 
-  $('previewInputTotal')
-    .textContent =
+  $('previewInputTotal').textContent =
     btc(data.inputTotalBtc);
 
-  $('previewAmount')
-    .textContent =
+  $('previewAmount').textContent =
     btc(data.amountBtc);
 
-  $('previewFee')
-    .textContent =
+  $('previewFee').textContent =
     btc(data.feeBtc);
 
-  $('previewChange')
-    .textContent =
+  $('previewChange').textContent =
     btc(data.changeBtc);
 
-  $('previewTypes')
-    .textContent =
-    data.inputTypes
-      .map(
-        type => type.replaceAll(
-          '_',
-          '-'
-        )
+  $('previewTypes').textContent =
+    (data.inputTypes || [])
+      .map((type) =>
+        String(type)
+          .replaceAll('_', '-')
       )
       .join(', ');
 
-  $('previewUtxos')
-    .innerHTML =
-    data.selected.map(
-      u => `
-        <tr>
 
-          <td>
-            ${typeBadge(u.type)}
-          </td>
+  const selected =
+    Array.isArray(data.selected)
+      ? data.selected
+      : [];
 
-          <td class="txid">
-            ${escapeHtml(u.txid)}
-          </td>
 
-          <td>
-            ${u.vout}
-          </td>
+  if (!selected.length) {
 
-          <td>
-            ${btc(u.amountBtc)}
-          </td>
+    $('previewUtxos').innerHTML = `
+      <tr>
+        <td colspan="5">
+          Không có UTXO được chọn.
+        </td>
+      </tr>
+    `;
 
-          <td>
-            ${u.confirmations}
-          </td>
+  } else {
 
-        </tr>
-      `
-    ).join('');
+    $('previewUtxos').innerHTML =
+      selected.map((u) => {
+
+        return `
+          <tr>
+
+            <td>
+              ${typeBadge(u.type)}
+            </td>
+
+            <td class="txid">
+              ${escapeHtml(u.txid)}
+            </td>
+
+            <td>
+              ${escapeHtml(u.vout)}
+            </td>
+
+            <td>
+              ${btc(u.amountBtc)}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                u.confirmations ?? 0
+              )}
+            </td>
+
+          </tr>
+        `;
+
+      }).join('');
+  }
+
 
   $('previewPanel')
-    .classList.remove(
-      'hidden'
-    );
+    .classList.remove('hidden');
 }
 
 
@@ -832,8 +992,9 @@ async function sendTransaction() {
   const message =
     $('transactionMessage');
 
-  $('sendBtn')
-    .disabled = true;
+
+  $('sendBtn').disabled = true;
+
 
   showMessage(
     message,
@@ -841,10 +1002,10 @@ async function sendTransaction() {
     ''
   );
 
+
   $('sendResult')
-    .classList.add(
-      'hidden'
-    );
+    .classList.add('hidden');
+
 
   try {
 
@@ -863,30 +1024,26 @@ async function sendTransaction() {
         }
       );
 
-    $('resultTxid')
-      .textContent =
-      data.txid;
 
-    $('resultAmount')
-      .textContent =
+    $('resultTxid').textContent =
+      data.txid || '—';
+
+    $('resultAmount').textContent =
       btc(data.amountBtc);
 
-    $('resultFee')
-      .textContent =
+    $('resultFee').textContent =
       btc(data.feeBtc);
 
-    $('resultChange')
-      .textContent =
+    $('resultChange').textContent =
       btc(data.changeBtc);
 
-    $('resultInputs')
-      .textContent =
-      `${data.signedInputs} signature(s)`;
+    $('resultInputs').textContent =
+      `${data.signedInputs ?? 0} signature(s)`;
+
 
     $('sendResult')
-      .classList.remove(
-        'hidden'
-      );
+      .classList.remove('hidden');
+
 
     showMessage(
       message,
@@ -894,7 +1051,9 @@ async function sendTransaction() {
       'success'
     );
 
-    // Cập nhật dữ liệu ngay
+
+    // Cập nhật ngay dữ liệu hiện tại.
+    // UTXO confirmation sẽ thay đổi sau khi Mine.
     await refreshAll();
 
   } catch (error) {
@@ -907,8 +1066,7 @@ async function sendTransaction() {
 
   } finally {
 
-    $('sendBtn')
-      .disabled = false;
+    $('sendBtn').disabled = false;
   }
 }
 
@@ -928,8 +1086,22 @@ async function faucet() {
       .value
       .trim();
 
-  $('faucetBtn')
-    .disabled = true;
+  const button =
+    $('faucetBtn');
+
+  const message =
+    $('faucetMessage');
+
+
+  button.disabled = true;
+
+
+  showMessage(
+    message,
+    'Đang tạo Faucet transaction...',
+    ''
+  );
+
 
   try {
 
@@ -946,6 +1118,14 @@ async function faucet() {
         }
       );
 
+
+    showMessage(
+      message,
+      `Faucet thành công. TXID: ${data.txid}. Hãy Mine 1 Block.`,
+      'success'
+    );
+
+
     alert(
       `Faucet transaction đã được tạo.\n\n` +
       `TXID: ${data.txid}\n\n` +
@@ -954,7 +1134,16 @@ async function faucet() {
       `Hãy Mine 1 Block rồi Refresh.`
     );
 
+
+    await loadHistory();
+
   } catch (error) {
+
+    showMessage(
+      message,
+      error.message,
+      'error'
+    );
 
     alert(
       `Faucet lỗi:\n${error.message}`
@@ -962,8 +1151,7 @@ async function faucet() {
 
   } finally {
 
-    $('faucetBtn')
-      .disabled = false;
+    button.disabled = false;
   }
 }
 
@@ -974,17 +1162,19 @@ async function faucet() {
 
 async function mineBlock() {
 
-  $('mineBtn')
-    .disabled = true;
+  const button =
+    $('mineBtn');
+
+  button.disabled = true;
+
 
   $('mineResult')
-    .classList.remove(
-      'hidden'
-    );
+    .classList.remove('hidden');
 
-  $('mineResult')
-    .textContent =
+
+  $('mineResult').textContent =
     'Đang mine 1 block...';
+
 
   try {
 
@@ -997,24 +1187,29 @@ async function mineBlock() {
         }
       );
 
-    $('mineResult')
-      .textContent =
-      `Đã mine 1 block.\n` +
-      `Block hash: ${data.blocks[0]}\n` +
-      `Mining address: ${data.miningAddress}`;
+
+    const blocks =
+      Array.isArray(data.blocks)
+        ? data.blocks
+        : [];
+
+
+    $('mineResult').textContent =
+      `Đã mine 1 block.\n\n` +
+      `Block hash: ${blocks[0] || '—'}\n\n` +
+      `Mining address: ${data.miningAddress || '—'}`;
+
 
     await refreshAll();
 
   } catch (error) {
 
-    $('mineResult')
-      .textContent =
+    $('mineResult').textContent =
       `Mine lỗi: ${error.message}`;
 
   } finally {
 
-    $('mineBtn')
-      .disabled = false;
+    button.disabled = false;
   }
 }
 
@@ -1028,16 +1223,16 @@ document.addEventListener(
   async (event) => {
 
     const button =
-      event.target.closest(
-        '[data-copy]'
-      );
+      event.target.closest('[data-copy]');
 
     if (!button) {
       return;
     }
 
+
     const value =
       button.dataset.copy;
+
 
     try {
 
@@ -1045,18 +1240,24 @@ document.addEventListener(
         value
       );
 
+
       const oldText =
         button.textContent;
+
 
       button.textContent =
         'Copied';
 
+
       setTimeout(() => {
+
         button.textContent =
           oldText;
+
       }, 1000);
 
     } catch {
+
       alert(
         'Không thể copy tự động.'
       );
@@ -1075,11 +1276,13 @@ $('refreshBtn')
     refreshAll
   );
 
+
 $('previewBtn')
   .addEventListener(
     'click',
     previewTransaction
   );
+
 
 $('sendBtn')
   .addEventListener(
@@ -1087,11 +1290,13 @@ $('sendBtn')
     sendTransaction
   );
 
+
 $('faucetBtn')
   .addEventListener(
     'click',
     faucet
   );
+
 
 $('mineBtn')
   .addEventListener(

@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -15,6 +16,7 @@
 <body>
 
 <header class="header">
+
   <div>
     <div class="eyebrow">
       PTIT · BLOCKCHAIN / FINTECH LAB
@@ -28,30 +30,39 @@
   </div>
 
   <div class="header-actions">
+
     <button
       id="refreshBtn"
       class="btn btn-primary"
     >
       ↻ Refresh
     </button>
+
   </div>
+
 </header>
 
 
 <main class="container">
 
-  <!-- ====================================================== -->
-  <!-- STATUS -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       STATUS
+       ====================================================== -->
 
   <section class="card">
 
     <div class="section-title">
+
       <div>
         <h2>Blockchain Status</h2>
-        <p>Trạng thái Bitcoin Core Regtest hiện tại</p>
+
+        <p>
+          Trạng thái Bitcoin Core Regtest hiện tại
+        </p>
       </div>
+
     </div>
+
 
     <div class="status-grid">
 
@@ -77,6 +88,7 @@
 
     </div>
 
+
     <div
       id="statusMessage"
       class="message"
@@ -85,24 +97,29 @@
   </section>
 
 
-  <!-- ====================================================== -->
-  <!-- BALANCE -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       BALANCE
+       ====================================================== -->
 
   <section class="card">
 
     <div class="section-title">
+
       <div>
         <h2>Balance</h2>
+
         <p>
-          Số dư được tính trực tiếp từ UTXO của các address lab
+          Số dư được tính trực tiếp từ UTXO của các address Lab Wallet
         </p>
       </div>
+
     </div>
+
 
     <div class="balance-main">
 
       <div class="balance-box primary-balance">
+
         <span>Ví của tôi</span>
 
         <strong id="myBalance">
@@ -112,9 +129,12 @@
         <small>
           Lab Wallet · 4 address types
         </small>
+
       </div>
 
+
       <div class="balance-box">
+
         <span>Faucet / Miner</span>
 
         <strong id="minerBalance">
@@ -124,9 +144,12 @@
         <small>
           Bitcoin Core wallet: miner
         </small>
+
       </div>
 
+
       <div class="balance-box">
+
         <span>Tổng UTXO</span>
 
         <strong id="utxoCount">
@@ -136,9 +159,11 @@
         <small>
           UTXO đang chưa được spend
         </small>
+
       </div>
 
     </div>
+
 
     <div class="balance-types">
 
@@ -167,20 +192,24 @@
   </section>
 
 
-  <!-- ====================================================== -->
-  <!-- ADDRESSES -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       ADDRESSES
+       ====================================================== -->
 
   <section class="card">
 
     <div class="section-title">
+
       <div>
         <h2>My Wallet Addresses</h2>
+
         <p>
           Bốn address được sinh từ cùng một private key
         </p>
       </div>
+
     </div>
+
 
     <div
       id="addressList"
@@ -190,43 +219,58 @@
   </section>
 
 
-  <!-- ====================================================== -->
-  <!-- FAUCET -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       FAUCET
+       ====================================================== -->
 
   <section class="card">
 
     <div class="section-title">
+
       <div>
         <h2>Regtest Faucet</h2>
+
         <p>
           Miner wallet gửi BTC Regtest vào một address của Lab Wallet
         </p>
       </div>
+
     </div>
+
 
     <div class="form-grid">
 
       <div class="form-group">
+
         <label for="faucetType">
           Address nhận
         </label>
 
         <select id="faucetType">
-          <option value="P2PKH">P2PKH</option>
+
+          <option value="P2PKH">
+            P2PKH
+          </option>
+
           <option value="P2SH_P2WPKH">
             P2SH-P2WPKH
           </option>
+
           <option value="P2WPKH">
             P2WPKH
           </option>
+
           <option value="P2TR">
             P2TR
           </option>
+
         </select>
+
       </div>
 
+
       <div class="form-group">
+
         <label for="faucetAmount">
           Số lượng BTC
         </label>
@@ -236,42 +280,60 @@
           type="text"
           value="1"
           placeholder="1.00000000"
+          autocomplete="off"
         >
+
       </div>
 
+
       <div class="form-group form-action">
+
         <button
           id="faucetBtn"
           class="btn btn-secondary"
         >
           Gửi từ Faucet
         </button>
+
       </div>
 
     </div>
 
+
     <div class="notice">
+
       Faucet transaction nằm trong mempool trước khi được mine.
+
       Hãy bấm <b>Mine 1 Block</b> để đưa giao dịch vào blockchain
       và cập nhật UTXO.
+
     </div>
+
+
+    <div
+      id="faucetMessage"
+      class="message"
+    ></div>
 
   </section>
 
 
-  <!-- ====================================================== -->
-  <!-- MINING -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       MINING
+       ====================================================== -->
 
   <section class="card">
 
     <div class="section-title">
+
       <div>
         <h2>Mine Block</h2>
+
         <p>
           Mine 1 block Regtest để xác nhận transaction
         </p>
       </div>
+
 
       <button
         id="mineBtn"
@@ -279,7 +341,9 @@
       >
         ⛏ Mine 1 Block
       </button>
+
     </div>
+
 
     <div
       id="mineResult"
@@ -289,20 +353,26 @@
   </section>
 
 
-  <!-- ====================================================== -->
-  <!-- TRANSACTION -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       TRANSACTION
+       ====================================================== -->
 
   <section class="card">
 
     <div class="section-title">
+
       <div>
+
         <h2>Send Bitcoin</h2>
+
         <p>
           Chọn UTXO → tạo PSBT → ký bằng SDK → broadcast
         </p>
+
       </div>
+
     </div>
+
 
     <div class="form-grid transaction-form">
 
@@ -316,10 +386,11 @@
           id="destination"
           type="text"
           placeholder="Nhập địa chỉ Bitcoin Regtest..."
+          autocomplete="off"
         >
 
         <small>
-          Có thể dùng địa chỉ Regtest của ví khác.
+          Chỉ sử dụng địa chỉ Bitcoin Regtest.
         </small>
 
       </div>
@@ -336,6 +407,7 @@
           type="text"
           value="0.5"
           placeholder="0.50000000"
+          autocomplete="off"
         >
 
       </div>
@@ -388,6 +460,7 @@
           Xem trước giao dịch
         </button>
 
+
         <button
           id="sendBtn"
           class="btn btn-primary"
@@ -414,6 +487,7 @@
     >
 
       <h3>Transaction Preview</h3>
+
 
       <div class="summary-grid">
 
@@ -452,11 +526,13 @@
 
       <h4>UTXO được chọn</h4>
 
+
       <div class="table-wrapper">
 
         <table>
 
           <thead>
+
             <tr>
               <th>Type</th>
               <th>TXID</th>
@@ -464,10 +540,10 @@
               <th>Amount</th>
               <th>Confirm</th>
             </tr>
+
           </thead>
 
-          <tbody id="previewUtxos">
-          </tbody>
+          <tbody id="previewUtxos"></tbody>
 
         </table>
 
@@ -485,6 +561,7 @@
 
       <h3>Transaction Broadcasted</h3>
 
+
       <div class="tx-result">
 
         <span>TXID</span>
@@ -494,6 +571,7 @@
         </code>
 
       </div>
+
 
       <div class="result-details">
 
@@ -519,9 +597,10 @@
 
       </div>
 
+
       <p>
         Giao dịch đã được broadcast tới Bitcoin Core.
-        Confirmation sẽ tăng sau khi mine block.
+        Hãy Mine 1 Block để xác nhận giao dịch.
       </p>
 
     </div>
@@ -529,9 +608,9 @@
   </section>
 
 
-  <!-- ====================================================== -->
-  <!-- UTXO -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       UTXO
+       ====================================================== -->
 
   <section class="card">
 
@@ -539,12 +618,14 @@
 
       <div>
         <h2>Current UTXO Set</h2>
+
         <p>
           UTXO thực tế của 4 address Lab Wallet
         </p>
       </div>
 
     </div>
+
 
     <div class="summary">
 
@@ -566,6 +647,7 @@
       <table>
 
         <thead>
+
           <tr>
             <th>Type</th>
             <th>TXID</th>
@@ -574,10 +656,10 @@
             <th>Confirmations</th>
             <th>Address</th>
           </tr>
+
         </thead>
 
-        <tbody id="utxoTable">
-        </tbody>
+        <tbody id="utxoTable"></tbody>
 
       </table>
 
@@ -586,22 +668,26 @@
   </section>
 
 
-  <!-- ====================================================== -->
-  <!-- TRANSACTION HISTORY -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       TRANSACTION HISTORY
+       ====================================================== -->
 
   <section class="card">
 
     <div class="section-title">
 
       <div>
+
         <h2>Transaction History</h2>
+
         <p>
-          Lịch sử transaction từ Bitcoin Core
+          Lịch sử thao tác giao dịch của Lab Wallet
         </p>
+
       </div>
 
     </div>
+
 
     <div class="table-wrapper">
 
@@ -611,6 +697,7 @@
 
           <tr>
             <th>Time</th>
+            <th>Status</th>
             <th>Type</th>
             <th>Amount</th>
             <th>TXID</th>
@@ -619,8 +706,7 @@
 
         </thead>
 
-        <tbody id="historyTable">
-        </tbody>
+        <tbody id="historyTable"></tbody>
 
       </table>
 
@@ -629,22 +715,26 @@
   </section>
 
 
-  <!-- ====================================================== -->
-  <!-- LATEST TRANSACTION DETAIL -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       LATEST TRANSACTION DETAIL
+       ====================================================== -->
 
   <section class="card">
 
     <div class="section-title">
 
       <div>
+
         <h2>Latest Transaction Detail</h2>
+
         <p>
-          Chi tiết transaction gần nhất
+          Chi tiết transaction gần nhất trên Bitcoin Core
         </p>
+
       </div>
 
     </div>
+
 
     <div
       id="latestTransaction"
@@ -656,22 +746,26 @@
   </section>
 
 
-  <!-- ====================================================== -->
-  <!-- WORKFLOW -->
-  <!-- ====================================================== -->
+  <!-- ======================================================
+       WORKFLOW
+       ====================================================== -->
 
   <section class="card">
 
     <div class="section-title">
 
       <div>
+
         <h2>Lab Workflow</h2>
+
         <p>
           Quy trình thực hiện bài thực hành
         </p>
+
       </div>
 
     </div>
+
 
     <div class="workflow">
 
@@ -698,34 +792,48 @@
 
       <div class="workflow-step">
         <b>04</b>
-        <span>Scan UTXO</span>
+        <span>Faucet</span>
       </div>
 
       <div class="workflow-arrow">→</div>
 
       <div class="workflow-step">
         <b>05</b>
-        <span>Coin Selection</span>
+        <span>Scan UTXO</span>
       </div>
 
       <div class="workflow-arrow">→</div>
 
       <div class="workflow-step">
         <b>06</b>
-        <span>PSBT + SDK Signing</span>
+        <span>Coin Selection</span>
       </div>
 
       <div class="workflow-arrow">→</div>
 
       <div class="workflow-step">
         <b>07</b>
-        <span>Broadcast</span>
+        <span>PSBT + SDK Signing</span>
       </div>
 
       <div class="workflow-arrow">→</div>
 
       <div class="workflow-step">
         <b>08</b>
+        <span>Broadcast</span>
+      </div>
+
+      <div class="workflow-arrow">→</div>
+
+      <div class="workflow-step">
+        <b>09</b>
+        <span>Mine / Confirm</span>
+      </div>
+
+      <div class="workflow-arrow">→</div>
+
+      <div class="workflow-step">
+        <b>10</b>
         <span>Refresh / History</span>
       </div>
 
